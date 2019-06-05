@@ -11,9 +11,17 @@ class HomeController extends Controller
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(Request $request)
     {
-        $this->middleware('auth');
+        // Get Variation from Session
+        $this->middleware(function ($request, $next) {
+
+            $this->variation = session()->get('variation');
+            $this->featureEnable = session()->get('featureEnable');
+            $this->specialMenu = session()->get('specialMenu');
+
+            return $next($request);
+        });
     }
 
     /**
@@ -23,6 +31,22 @@ class HomeController extends Controller
      */
     public function index()
     {
-        return view('home');
+        return view('experiment')->withVariation($this->variation)
+            ->withFeatureEnable($this->featureEnable)
+            ->withspecialMenu($this->specialMenu);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        // $request->session()->flash('success', 'The order are coming!');
+
+
+        return view('order_complete');
     }
 }
