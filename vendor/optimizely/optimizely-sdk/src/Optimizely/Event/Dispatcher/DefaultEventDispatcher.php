@@ -19,6 +19,8 @@ namespace Optimizely\Event\Dispatcher;
 use GuzzleHttp\Client as HttpClient;
 use Optimizely\Event\LogEvent;
 
+use Illuminate\Support\Facades\Log;
+
 /**
  * Class DefaultEventDispatcher
  *
@@ -49,6 +51,12 @@ class DefaultEventDispatcher implements EventDispatcherInterface
             'timeout' => DefaultEventDispatcher::TIMEOUT,
             'connect_timeout' => DefaultEventDispatcher::TIMEOUT
         ];
+
+        Log::info($event->getHttpVerb());
+        Log::info($event->getUrl());
+        Log::info($event->getHeaders());
+        Log::debug($event->getParams());
+        Log::info(DefaultEventDispatcher::TIMEOUT);
 
         $this->httpClient->request($event->getHttpVerb(), $event->getUrl(), $options);
     }
