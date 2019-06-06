@@ -15,7 +15,8 @@
 //     return view('experiment');
 // });
 
-Route::get('/', 'HomeController@index')->name('home')->middleware('checkVariation');
+// Route::get('/', 'HomeController@index')->name('home')->middleware('checkVariation');
+Route::get('/', 'HomeController@index')->name('home');
 Route::post('/order', 'HomeController@store');
 
 Auth::routes();

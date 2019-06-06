@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Libraries\OptimizelyServices;
 
 class HomeController extends Controller
 {
@@ -11,17 +12,30 @@ class HomeController extends Controller
      *
      * @return void
      */
-    public function __construct(Request $request)
+    public function __construct(Request $request, OptimizelyServices $optimizely)
     {
-        // Get Variation from Session
-        $this->middleware(function ($request, $next) {
+        // Get Optimizely Client
+        $this->optimizelyClient = $optimizely->optimizelyClient;
 
-            $this->variation = session()->get('variation');
-            $this->featureEnable = session()->get('featureEnable');
-            $this->specialMenu = session()->get('specialMenu');
+        // Get User ID and Set Audience
+        $userId = $optimizely->userId;
+        $this->attributes = ['device' => 'desktop'];
 
-            return $next($request);
-        });
+        // Activat experiment and get variation
+        $this->variation = $this->optimizelyClient->activate('fullstack_assessment', $userId, $this->attributes);
+
+        // Check if feature enable
+        $this->featureEnabled = $this->optimizelyClient->isFeatureEnabled('special_menu_feature', $userId, $this->attributes);
+        $this->specialMenu['appetizer'] = '';
+        $this->specialMenu['main'] = '';
+        $this->specialMenu['dessert'] = '';
+
+        // Get Feature menu if enabled
+        if ($this->featureEnabled) {
+            $this->specialMenu['appetizer'] = $this->optimizelyClient->getFeatureVariableString('special_menu_feature', 'appetizer', $userId, $this->attributes);
+            $this->specialMenu['main'] = $this->optimizelyClient->getFeatureVariableString('special_menu_feature', 'main', $userId, $this->attributes);
+            $this->specialMenu['dessert'] = $this->optimizelyClient->getFeatureVariableString('special_menu_feature', 'dessert', $userId, $this->attributes);
+        }
     }
 
     /**
@@ -32,7 +46,7 @@ class HomeController extends Controller
     public function index()
     {
         return view('experiment')->withVariation($this->variation)
-            ->withFeatureEnable($this->featureEnable)
+            ->withFeatureEnabled($this->featureEnabled)
             ->withspecialMenu($this->specialMenu);
     }
 
@@ -42,10 +56,10 @@ class HomeController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(OptimizelyServices $optimizely)
     {
-        // $request->session()->flash('success', 'The order are coming!');
-
+        // Track custom events
+        $optimizely->customEvents($this->attributes);
 
         return view('order_complete');
     }

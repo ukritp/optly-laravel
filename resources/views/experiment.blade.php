@@ -18,7 +18,7 @@
                 </div>
             </div>
             <br>
-            @if ($featureEnable)
+            @if ($featureEnabled)
                 @include('variations._feature')
             @endif
             <br>
@@ -67,20 +67,22 @@
                                 </div>
                             </div>
                             <hr>
-                            <div class="row">
-                                    <div class="col-md-8">Would you like to Today Special set instead?</div>
-                                    <div class="col-md-4">
-                                        <div class="radio">
-                                            <label class="radio-inline">
-                                                <input type="radio" name="special" id="special1" value="1"> Yes
-                                            </label>
-                                            <label class="radio-inline">
-                                                <input type="radio" name="special" id="special2" value="0"> No
-                                            </label>
+                            @if ($featureEnabled)
+                                <div class="row">
+                                        <div class="col-md-8">Would you like to Today Special set instead?</div>
+                                        <div class="col-md-4">
+                                            <div class="radio">
+                                                <label class="radio-inline">
+                                                    <input type="radio" name="special" id="special1" value="1"> Yes
+                                                </label>
+                                                <label class="radio-inline">
+                                                    <input type="radio" name="special" id="special2" value="0"> No
+                                                </label>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            <hr>
+                                <hr>
+                            @endif
                             <button type="submit" class="btn btn-primary">Order</button>
                         </form>
                     </div>
