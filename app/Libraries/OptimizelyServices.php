@@ -1,6 +1,7 @@
 <?php
 namespace App\Libraries;
 
+use Illuminate\Support\Facades\Log;
 use Optimizely\Optimizely;
 use Optimizely\Event\Dispatcher\DefaultEventDispatcher;
 use Optimizely\ErrorHandler\DefaultErrorHandler;
@@ -32,17 +33,27 @@ class OptimizelyServices
             $datafile = file_get_contents($url['prod']);
 		}
 
-        // Instantiate an Optimizely client
-		// $this->optimizelyClient = new Optimizely($datafile);
-
 		/**
 		 * Create an Optimizely client with the default event dispatcher.
 		 * Please note, if not provided it will default to this event dispatcher.
 		 */
 		$this->optimizelyClient = new Optimizely($datafile, new DefaultEventDispatcher(), null, new DefaultErrorHandler());
 
-		// dd($this->optimizelyClient);
+		// Set user id
 		$this->userId = $this->getUserId();
+
+		// Add a ACTIVATE listener
+		// $activateId = $this->optimizelyClient->notificationCenter->addNotificationListener(
+		// 	NotificationType::ACTIVATE,
+		// 	$this->onActivate()
+		// );
+
+		// Add a TRACK listener
+		// $trackId = $this->optimizelyClient->notificationCenter->addNotificationListener(
+		// 	NotificationType::TRACK,
+		// 	$this->onTrack()
+		// );
+
 	}
 
 	public function getUserId()
@@ -75,36 +86,19 @@ class OptimizelyServices
 		if ($dessert) {
 			$this->optimizelyClient->track('order_dessert', $this->userId, $attributes);
 		}
-		if ($special !== null && $special === 1) {
+		if ($special !== null && $special === '1') {
 			$this->optimizelyClient->track('order_special', $this->userId, $attributes);
 		}
 	}
 
-	public function onDecision($type, $userId, $attributes, $decisionInfo)
+	function onActivate($experiment, $userId, $attributes, $variation)
 	{
-		// $decisionInfo will have information based on $type
-		if ($type == 'ab-test') {
-			// Access experiment key and variation key
-			print($decisionInfo->experimentKey);
-			print($decisionInfo->variationKey);
-		}
+		echo 'activate experiment ' . $experiment->getKey() . ' for user ' . $userId;
+	}
 
-		if ($type == 'feature') {
-			// Access information about feature
-			print($decisionInfo->featureKey);
-			print($decisionInfo->featureEnabled);
-			print($decisionInfo->source);
-		}
-
-		if ($type == 'feature-variable') {
-			// Access information about feature's variable
-			print($decisionInfo->featureKey);
-			print($decisionInfo->featureEnabled);
-			print($decisionInfo->source);
-			print($decisionInfo->variableKey);
-			print($decisionInfo->variableType);
-			print($decisionInfo->variableValue);
-		}
+	function onTrack($eventKey, $userId, $attributes, $eventTags, $event)
+	{
+		echo 'conversion event ' . $eventKey . ' for user ' . $userId;
 	}
 
 }

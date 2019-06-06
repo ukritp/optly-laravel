@@ -16,12 +16,15 @@
  */
 namespace Optimizely\ErrorHandler;
 
+use Illuminate\Support\Facades\Log;
+
 use Exception;
 
 class DefaultErrorHandler implements ErrorHandlerInterface
 {
     public function handleError(Exception $error)
     {
+        Log::error($error);
         throw $error;
     }
 }
